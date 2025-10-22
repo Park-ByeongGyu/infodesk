@@ -16,6 +16,29 @@ class Order(BaseModel):
     orderStatus: str   # 접수, 완료, 취소
     orderDetail: List[OrderDetail]
 
+
+class OrderStatus(str, Enum):
+    접수 = '접수'
+    제조중 = '제조중'
+    완료 = '완료'
+    픽업대기 = '픽업대기'
+
+
+class OrderState(BaseModel):
+    orderId: int
+    orderStatus: OrderStatus
+
+class OrderStateUpdate(BaseModel):
+    orders: List[OrderState]
+
+
+
+
+
+
+
+
+
 #응답
 class OrderStatusEnum(str, Enum):
     접수 = "접수"

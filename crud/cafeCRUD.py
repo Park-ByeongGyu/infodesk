@@ -18,3 +18,10 @@ def get_beverageOrder(db: Session):
 
 def get_menu(db: Session):
     return db.query(Beverage).all()
+
+def update_order_status(orderID: int,status: str,db:Session):
+    _status = db.query(BeverageOrder).filter(BeverageOrder.OrderID == orderID).first()
+    _status.OrderStatus = status
+    db.commit()
+    db.refresh(_status)
+    return _status

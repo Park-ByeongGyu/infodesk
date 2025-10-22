@@ -64,7 +64,7 @@ class MenuRequest(BaseModel):
 #응답 데이터
 
 #요청
-class Response(BaseModel):
+class ResponseApp(BaseModel):
     message: str
 
 #도서 정보 요청
@@ -81,3 +81,4 @@ class GuideResponse(BaseModel):
 class MenuResponse(BaseModel):
     orderID: int
     message: str
+
