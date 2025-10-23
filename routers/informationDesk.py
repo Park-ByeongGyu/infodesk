@@ -5,6 +5,7 @@ from schemas.informationDesk import *
 from crud import infodeskCRUD
 from datetime import date, timedelta
 from models.Rental import Rental
+
 router = APIRouter(prefix="/infodesk", tags=["Infodesk"])
 
 
@@ -41,18 +42,36 @@ def get_bookInfo(
     db: Session = Depends(get_db)
 ):
     total, books = infodeskCRUD.get_books(db, keyword, page, per_page)
+    print("hello")
+    #도서 대여 가능 여부
+    #Rental의 ReturnDate - DueDate로 대여 여부 결정
 
+    copyids = []
+    for book in books:  #ISBN을 통해 도서관 보유 책 회
+        bookmats = infodeskCRUD.get_book_status(db, book.ISBN)
+        for bookmat in bookmats:
+            copyids.append(bookmat.CopyID)
 
+    rentalStatus = LoanStatus.UNAVAILABLE
+    results = []
+    rental = infodeskCRUD.get_rental_status(db, copyids)
+    for returnDate in rental:
+        print(returnDate + "ddddddddddd")
+        if returnDate is None:
+            rentalStatus = LoanStatus.AVAILABLE
+        else:
+            rentalStatus = LoanStatus.UNAVAILABLE
 
-    results = [
-        BookInfo(
+        for book in books:
+            BookInfo(
             isbn=book.ISBN,
             title=book.Title,
             author=book.Author,
             publisher=book.Publisher,
-            status=LoanStatus.AVAILABLE
+            status=rentalStatus
         )
-    for book in books ] 
+        results.append(BookInfo)
+
     return BookSearch(
         total=total,
         page=page,
@@ -65,6 +84,8 @@ def get_bookInfo(
 def get_book_location(isbn: str, db:Session = Depends(get_db)):
     #db에서 isbn을 조회후  위치 정보를 전송
     loc = infodeskCRUD.get_book_location(db, isbn)
+    if not loc:
+        raise HTTPException(status_code=404, detail="해당 바코드의 도서를 찾을 수 없습니다.")
     if  not loc:
         return BookLocation(
             locationName="",
